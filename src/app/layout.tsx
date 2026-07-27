@@ -16,10 +16,20 @@ const instrument = Instrument_Serif({
   weight: "400",
 });
 
+const basePath = process.env.BASE_PATH || "";
+
 export const metadata: Metadata = {
   title: "Redo — Content Style Guide",
   description:
     "The Redo content system: how our videos move audiences from awareness to decision.",
+  icons: {
+    icon: [
+      { url: `${basePath}/favicon.ico`, sizes: "any" },
+      { url: `${basePath}/icon.png`, type: "image/png" },
+    ],
+    shortcut: `${basePath}/favicon.ico`,
+    apple: `${basePath}/icon.png`,
+  },
 };
 
 export default function RootLayout({
