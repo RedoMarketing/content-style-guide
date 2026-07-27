@@ -30,7 +30,7 @@ export const STAGES: Record<Stage, StageMeta> = {
     label: "Awareness",
     level: "Brand",
     tagline:
-      'Everything here follows the theme "Win with Redo." Storytelling that captures interest beyond our ICP.',
+      'Everything here follows the theme "Win with Redo." Storytelling that captures interest across your whole ICP, not just buyers.',
     formats: ["Short film", "UGC / explainer", "Case study / podcast", "Meme / trend"],
     extra: "+ static edits of each",
     color: "var(--stage-awareness)",

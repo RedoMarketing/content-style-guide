@@ -54,9 +54,9 @@ export default function FunnelPanel({ onClose }: { onClose: () => void }) {
         <div className="funnel-intro">
           <h1 className="fpage-title">How the funnel works</h1>
           <p className="funnel-lede">
-            Every asset on this board does one of three jobs. Together they walk a
-            stranger from &ldquo;who&rsquo;s this?&rdquo; to &ldquo;take my
-            money,&rdquo; getting more direct as intent rises.
+            Every asset here does one of three jobs. Together they move someone
+            from a first impression to a buying decision, getting more direct as
+            their intent rises.
           </p>
           <p className="funnel-flow">
             Entertaining <span aria-hidden>&rarr;</span> educational{" "}
