@@ -317,10 +317,156 @@ button {
 .page { padding-top: 40px; }
 .board-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 26px;
+}
+.learn-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--linen);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 9999px;
+  padding: 9px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: var(--tracking);
+  white-space: nowrap;
+  transition: background 0.14s, border-color 0.14s;
+}
+.learn-btn:hover { background: var(--linen-soft); border-color: var(--stone); }
+.learn-btn svg { color: var(--fog); }
+
+/* ---------- Funnel explainer (half-page panel) ---------- */
+.funnel-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(20, 16, 20, 0.4);
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: flex-end;
+}
+.funnel-panel {
+  width: clamp(360px, 48vw, 720px);
+  max-width: 94vw;
+  height: 100%;
+  background: #fff;
+  box-shadow: -20px 0 60px rgba(20, 16, 20, 0.22);
+  overflow-y: auto;
+  padding: 24px 30px 44px;
+  animation: drawer-in 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.funnel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.funnel-title {
+  margin: 10px 0 0;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+.funnel-lede {
+  margin: 12px 0 0;
+  color: var(--fog);
+  font-size: 16px;
+  line-height: 1.55;
+  max-width: 62ch;
+}
+.funnel-flow {
+  margin: 14px 0 6px;
+  color: var(--fog);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: var(--tracking);
+}
+.funnel-flow strong { color: var(--ink); font-weight: 800; }
+
+.fstage {
+  padding: 22px 0;
+  border-top: 1px solid var(--linen);
+}
+.fstage-top {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.fstage-top h3 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.fstage-level {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--stone);
+}
+.fstage-job {
+  margin: 8px 0 0;
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.5;
+  max-width: 62ch;
+}
+.fstage-sub { margin-top: 16px; }
+.fstage-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--stone);
+  margin-bottom: 8px;
+}
+.fstage-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.fstage-chip {
+  border: 1.5px dashed #c7ccd4;
+  background: #fff;
+  color: #5b6472;
+  border-radius: 9999px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: var(--tracking);
+}
+.fstage-note {
+  font-size: 14px;
+  color: var(--stone);
+  font-weight: 500;
+}
+.fstage-why {
+  margin: 0;
+  color: var(--fog);
+  font-size: 15px;
+  line-height: 1.55;
+  max-width: 62ch;
+}
+.fstage-together {
+  border-top: 1px solid var(--linen);
+  padding-top: 22px;
+  margin-top: 22px;
+}
+.fstage-together p {
+  margin: 0;
+  color: var(--fog);
+  font-size: 15px;
+  line-height: 1.55;
+  max-width: 62ch;
 }
 .board-title {
   margin: 0;
@@ -885,11 +1031,19 @@ button {
 .dropzone {
   border: 1.5px dashed var(--stone);
   border-radius: var(--r-input);
-  padding: 20px;
+  padding: 14px 16px;
   text-align: center;
   color: var(--fog);
   background: var(--linen-soft);
+  font-size: 15px;
+  cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
+}
+.dz-hint {
+  display: block;
+  margin-top: 3px;
+  font-size: 13px;
+  color: var(--stone);
 }
 .dropzone[data-drag="true"] { border-color: var(--pin-red); background: #fff; }
 

@@ -11,7 +11,7 @@ import {
   type Kind,
   type Media,
 } from "@/lib/stages";
-import { CloseIcon, UploadIcon } from "./icons";
+import { CloseIcon } from "./icons";
 
 interface Analyzed {
   poster: Blob | null;
@@ -243,15 +243,8 @@ export default function UploadDialog({
               }}
               onClick={() => inputRef.current?.click()}
             >
-              <div style={{ color: "var(--stone)", marginBottom: 8 }}>
-                <UploadIcon size={26} />
-              </div>
-              <div>
-                <strong>Drop files</strong> or click to browse
-              </div>
-              <div style={{ fontSize: 13, color: "var(--stone)", marginTop: 6 }}>
-                Add multiple for a carousel &middot; up to {MAX_MB}MB each
-              </div>
+              <strong>Drop files</strong> or click to browse
+              <span className="dz-hint">Multiple files become a carousel</span>
             </div>
           ) : (
             <div className="slide-strip">
