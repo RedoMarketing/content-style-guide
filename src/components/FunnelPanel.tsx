@@ -64,14 +64,13 @@ export default function FunnelPanel({ onClose }: { onClose: () => void }) {
           </p>
         </div>
 
-        {STAGE_ORDER.map((id, i) => {
+        {STAGE_ORDER.map((id) => {
           const s = STAGES[id];
           return (
             <div className="fstep" key={id}>
-              <div className="fstep-eyebrow">
-                Step {i + 1} of {STAGE_ORDER.length}
-              </div>
-              <h2 className="fstep-title">{s.label}</h2>
+              <h2 className="fstep-title" style={{ marginTop: 0 }}>
+                {s.label}
+              </h2>
               <div className="fstep-level">{s.level}</div>
               <p className="fstep-job">{JOB[id]}</p>
 
@@ -96,8 +95,9 @@ export default function FunnelPanel({ onClose }: { onClose: () => void }) {
         })}
 
         <div className="fstep">
-          <div className="fstep-eyebrow">The takeaway</div>
-          <h2 className="fstep-title">How they work together</h2>
+          <h2 className="fstep-title" style={{ marginTop: 0 }}>
+            How they work together
+          </h2>
           <p className="fstep-close-p" style={{ marginTop: 16 }}>
             Think of it as one journey, not three buckets. Someone might catch an
             Awareness film today, a Consideration explainer next week, and a
