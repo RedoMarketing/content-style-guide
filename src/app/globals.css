@@ -340,47 +340,77 @@ button {
 .learn-btn:hover { background: var(--linen-soft); border-color: var(--stone); }
 .learn-btn svg { color: var(--fog); }
 
-/* ---------- Funnel explainer (half-page panel) ---------- */
-.funnel-scrim {
+/* ---------- Funnel explainer (full page, horizontal scroll) ---------- */
+.funnel-page {
   position: fixed;
   inset: 0;
-  z-index: 60;
-  background: rgba(20, 16, 20, 0.4);
-  backdrop-filter: blur(2px);
-  display: flex;
-  justify-content: flex-end;
-}
-.funnel-panel {
-  width: clamp(360px, 48vw, 720px);
-  max-width: 94vw;
-  height: 100%;
+  z-index: 70;
   background: #fff;
-  box-shadow: -20px 0 60px rgba(20, 16, 20, 0.22);
-  overflow-y: auto;
-  padding: 24px 30px 44px;
-  animation: drawer-in 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  flex-direction: column;
+  animation: funnel-fade 0.2s ease;
 }
-.funnel-head {
+@keyframes funnel-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.funnel-topbar {
+  flex: none;
+  height: 64px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--linen);
 }
-.funnel-title {
-  margin: 10px 0 0;
-  font-size: 26px;
-  font-weight: 800;
-  letter-spacing: -0.035em;
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--linen);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 9999px;
+  padding: 9px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: var(--tracking);
+  transition: background 0.14s, border-color 0.14s;
+}
+.back-btn:hover { background: var(--linen-soft); border-color: var(--stone); }
+
+.funnel-hscroll {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+}
+.funnel-hscroll > * { scroll-snap-align: start; }
+
+.funnel-intro {
+  flex: none;
+  width: min(40vw, 460px);
+  padding: 56px 48px;
+  overflow-y: auto;
+}
+.fpage-title {
+  margin: 0;
+  font-family: var(--font-instrument), Georgia, serif;
+  font-size: clamp(38px, 5vw, 60px);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-wrap: balance;
 }
 .funnel-lede {
-  margin: 12px 0 0;
+  margin: 22px 0 0;
   color: var(--fog);
   font-size: 16px;
   line-height: 1.55;
-  max-width: 62ch;
 }
 .funnel-flow {
-  margin: 14px 0 6px;
+  margin: 16px 0 0;
   color: var(--fog);
   font-size: 15px;
   font-weight: 600;
@@ -388,37 +418,47 @@ button {
 }
 .funnel-flow strong { color: var(--ink); font-weight: 800; }
 
-.fstage {
-  padding: 22px 0;
-  border-top: 1px solid var(--linen);
+.fstep {
+  flex: none;
+  width: min(33vw, 380px);
+  padding: 56px 40px;
+  border-left: 1px solid var(--linen);
+  overflow-y: auto;
 }
-.fstage-top {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  flex-wrap: wrap;
+.fstep-eyebrow {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--stone);
+  letter-spacing: 0.02em;
 }
-.fstage-top h3 {
-  margin: 0;
-  font-size: 21px;
+.fstep-title {
+  margin: 16px 0 0;
+  font-size: 30px;
   font-weight: 800;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.035em;
 }
-.fstage-level {
+.fstep-level {
+  margin-top: 6px;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--stone);
 }
-.fstage-job {
-  margin: 8px 0 0;
+.fstep-job {
+  margin: 16px 0 0;
   color: var(--ink);
   font-size: 16px;
   line-height: 1.5;
-  max-width: 62ch;
 }
-.fstage-sub { margin-top: 16px; }
+.fstep-block { margin-top: 22px; }
+.fstep-close-p {
+  margin: 0;
+  color: var(--fog);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
 .fstage-label {
   display: block;
   font-size: 12px;
@@ -431,7 +471,6 @@ button {
 .fstage-chips {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
   gap: 8px;
 }
 .fstage-chip {
@@ -445,28 +484,22 @@ button {
   letter-spacing: var(--tracking);
 }
 .fstage-note {
+  display: block;
+  width: 100%;
   font-size: 14px;
   color: var(--stone);
   font-weight: 500;
+  margin-top: 6px;
 }
 .fstage-why {
   margin: 0;
   color: var(--fog);
   font-size: 15px;
   line-height: 1.55;
-  max-width: 62ch;
 }
-.fstage-together {
-  border-top: 1px solid var(--linen);
-  padding-top: 22px;
-  margin-top: 22px;
-}
-.fstage-together p {
-  margin: 0;
-  color: var(--fog);
-  font-size: 15px;
-  line-height: 1.55;
-  max-width: 62ch;
+
+@media (max-width: 720px) {
+  .funnel-intro, .fstep { width: 84vw; }
 }
 .board-title {
   margin: 0;

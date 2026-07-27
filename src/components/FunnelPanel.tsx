@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { STAGE_ORDER, STAGES } from "@/lib/stages";
-import { CloseIcon } from "./icons";
 
 const JOB: Record<string, string> = {
   awareness:
@@ -22,6 +21,20 @@ const WHY: Record<string, string> = {
     "Bottom of the funnel, for people ready to act. Be explicit about features, benefits, offers, and a clear call to action. Less story, more reasons to say yes right now.",
 };
 
+function BackArrow() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M15 5l-7 7 7 7"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default function FunnelPanel({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -30,45 +43,39 @@ export default function FunnelPanel({ onClose }: { onClose: () => void }) {
   }, [onClose]);
 
   return (
-    <div
-      className="funnel-scrim"
-      onMouseDown={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <aside
-        className="funnel-panel"
-        role="dialog"
-        aria-modal="true"
-        aria-label="How the funnel works"
-      >
-        <div className="funnel-head">
-          <span className="drawer-eyebrow">The content system</span>
-          <button className="icon-btn" onClick={onClose} aria-label="Close">
-            <CloseIcon />
-          </button>
+    <div className="funnel-page" role="dialog" aria-modal="true" aria-label="How the funnel works">
+      <div className="funnel-topbar">
+        <button className="back-btn" onClick={onClose}>
+          <BackArrow /> Back to board
+        </button>
+      </div>
+
+      <div className="funnel-hscroll">
+        <div className="funnel-intro">
+          <h1 className="fpage-title">How the funnel works</h1>
+          <p className="funnel-lede">
+            Every asset on this board does one of three jobs. Together they walk a
+            stranger from &ldquo;who&rsquo;s this?&rdquo; to &ldquo;take my
+            money,&rdquo; getting more direct as intent rises.
+          </p>
+          <p className="funnel-flow">
+            Entertaining <span aria-hidden>&rarr;</span> educational{" "}
+            <span aria-hidden>&rarr;</span> <strong>direct</strong>
+          </p>
         </div>
 
-        <h2 className="funnel-title">How the funnel works</h2>
-        <p className="funnel-lede">
-          Every asset on this board does one of three jobs. Together they walk a
-          stranger from &ldquo;who&rsquo;s this?&rdquo; to &ldquo;take my
-          money,&rdquo; getting more direct as intent rises.
-        </p>
-        <p className="funnel-flow">
-          Entertaining <span aria-hidden>&rarr;</span> educational{" "}
-          <span aria-hidden>&rarr;</span> <strong>direct</strong>
-        </p>
-
-        {STAGE_ORDER.map((id) => {
+        {STAGE_ORDER.map((id, i) => {
           const s = STAGES[id];
           return (
-            <section className="fstage" key={id}>
-              <div className="fstage-top">
-                <h3>{s.label}</h3>
-                <span className="fstage-level">{s.level}</span>
+            <div className="fstep" key={id}>
+              <div className="fstep-eyebrow">
+                Step {i + 1} of {STAGE_ORDER.length}
               </div>
-              <p className="fstage-job">{JOB[id]}</p>
+              <h2 className="fstep-title">{s.label}</h2>
+              <div className="fstep-level">{s.level}</div>
+              <p className="fstep-job">{JOB[id]}</p>
 
-              <div className="fstage-sub">
+              <div className="fstep-block">
                 <span className="fstage-label">What goes here</span>
                 <div className="fstage-chips">
                   {s.formats.map((f) => (
@@ -80,17 +87,18 @@ export default function FunnelPanel({ onClose }: { onClose: () => void }) {
                 </div>
               </div>
 
-              <div className="fstage-sub">
+              <div className="fstep-block">
                 <span className="fstage-label">Why</span>
                 <p className="fstage-why">{WHY[id]}</p>
               </div>
-            </section>
+            </div>
           );
         })}
 
-        <div className="fstage-together">
-          <span className="fstage-label">How they work together</span>
-          <p>
+        <div className="fstep">
+          <div className="fstep-eyebrow">The takeaway</div>
+          <h2 className="fstep-title">How they work together</h2>
+          <p className="fstep-close-p" style={{ marginTop: 16 }}>
             Think of it as one journey, not three buckets. Someone might catch an
             Awareness film today, a Consideration explainer next week, and a
             Decision offer once they are ready. The tone shifts from entertaining
@@ -98,7 +106,7 @@ export default function FunnelPanel({ onClose }: { onClose: () => void }) {
             where its viewer&rsquo;s head is at.
           </p>
         </div>
-      </aside>
+      </div>
     </div>
   );
 }
