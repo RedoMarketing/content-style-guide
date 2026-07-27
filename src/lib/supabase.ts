@@ -22,6 +22,7 @@ export interface VideoRow {
   width: number | null;
   height: number | null;
   duration: number | null;
+  slides: { path: string; media_type: "image" | "video" }[] | null;
 }
 
 export function publicUrl(path: string): string {

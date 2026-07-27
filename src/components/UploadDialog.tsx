@@ -46,10 +46,8 @@ function analyze(file: File): Promise<Analyzed> {
     video.preload = "metadata";
     video.muted = true;
     video.src = previewUrl;
-
     const bail = () =>
       resolve({ poster: null, width: 0, height: 0, duration: 0, previewUrl });
-
     video.onloadedmetadata = () => {
       const width = video.videoWidth;
       const height = video.videoHeight;
@@ -79,6 +77,12 @@ function analyze(file: File): Promise<Analyzed> {
 
 const MAX_MB = 100;
 
+interface Slide {
+  file: File;
+  meta: Analyzed;
+  mediaType: Media;
+}
+
 export default function UploadDialog({
   onClose,
   onDone,
@@ -86,14 +90,11 @@ export default function UploadDialog({
   onClose: () => void;
   onDone: () => void;
 }) {
-  const [file, setFile] = useState<File | null>(null);
-  const [meta, setMeta] = useState<Analyzed | null>(null);
+  const [slides, setSlides] = useState<Slide[]>([]);
   const [title, setTitle] = useState("");
   const [kind, setKind] = useState<Kind>("actual");
-  const [mediaType, setMediaType] = useState<Media>("video");
   const [stage, setStage] = useState<Stage>("awareness");
   const [format, setFormat] = useState<string>("");
-  const [description, setDescription] = useState("");
   const [drag, setDrag] = useState(false);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
@@ -103,9 +104,10 @@ export default function UploadDialog({
 
   useEffect(() => {
     return () => {
-      if (meta?.previewUrl) URL.revokeObjectURL(meta.previewUrl);
+      slides.forEach((s) => URL.revokeObjectURL(s.meta.previewUrl));
     };
-  }, [meta]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && !busy && onClose();
@@ -113,79 +115,96 @@ export default function UploadDialog({
     return () => window.removeEventListener("keydown", onKey);
   }, [busy, onClose]);
 
-  async function pick(f: File | undefined) {
+  async function addFiles(list: FileList | null) {
     setError("");
-    if (!f) return;
-    const isImage = f.type.startsWith("image/");
-    if (!f.type.startsWith("video/") && !isImage) {
-      setError("Add a video or image file.");
-      return;
+    if (!list || !list.length) return;
+    const incoming: Slide[] = [];
+    for (const f of Array.from(list)) {
+      const isImage = f.type.startsWith("image/");
+      if (!f.type.startsWith("video/") && !isImage) {
+        setError("Only video or image files.");
+        continue;
+      }
+      if (f.size > MAX_MB * 1024 * 1024) {
+        setError(`"${f.name}" is over ${MAX_MB}MB.`);
+        continue;
+      }
+      setStatus("Reading…");
+      const meta = await analyze(f);
+      incoming.push({ file: f, meta, mediaType: isImage ? "image" : "video" });
     }
-    if (f.size > MAX_MB * 1024 * 1024) {
-      setError(`File is over ${MAX_MB}MB. Trim or compress it first.`);
-      return;
-    }
-    setMediaType(isImage ? "image" : "video");
-    setFile(f);
-    if (!title) setTitle(f.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " "));
-    setStatus("Reading preview…");
-    const analyzed = await analyze(f);
-    setMeta(analyzed);
     setStatus("");
+    if (!incoming.length) return;
+    setSlides((prev) => [...prev, ...incoming]);
+    if (!title) {
+      const n = incoming[0].file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ");
+      setTitle(n);
+    }
+  }
+
+  function removeSlide(idx: number) {
+    setSlides((prev) => {
+      const s = prev[idx];
+      if (s) URL.revokeObjectURL(s.meta.previewUrl);
+      return prev.filter((_, i) => i !== idx);
+    });
   }
 
   async function submit() {
-    if (!file) return setError("Add a video first.");
+    if (!slides.length) return setError("Add at least one file.");
     if (!title.trim()) return setError("Give it a title.");
     setBusy(true);
     setError("");
     try {
-      const id = crypto.randomUUID();
-      const ext = (file.name.split(".").pop() || "mp4").toLowerCase();
-      const videoPath = `clips/${id}.${ext}`;
-
-      setStatus(mediaType === "image" ? "Uploading image…" : "Uploading video…");
-      setPct(25);
-      const up = await supabase.storage
-        .from(BUCKET)
-        .upload(videoPath, file, { contentType: file.type, upsert: false });
-      if (up.error) throw up.error;
-
+      const uploaded: { path: string; media_type: Media }[] = [];
       let posterPath: string | null = null;
-      if (meta?.poster) {
-        setStatus("Uploading thumbnail…");
-        setPct(65);
-        posterPath = `posters/${id}.jpg`;
-        const pp = await supabase.storage
+
+      for (let i = 0; i < slides.length; i++) {
+        const s = slides[i];
+        setStatus(`Uploading ${i + 1} / ${slides.length}…`);
+        setPct(Math.round(((i + 0.5) / slides.length) * 90));
+        const id = crypto.randomUUID();
+        const ext = (s.file.name.split(".").pop() || (s.mediaType === "video" ? "mp4" : "jpg")).toLowerCase();
+        const path = `clips/${id}.${ext}`;
+        const up = await supabase.storage
           .from(BUCKET)
-          .upload(posterPath, meta.poster, { contentType: "image/jpeg" });
-        if (pp.error) posterPath = null;
+          .upload(path, s.file, { contentType: s.file.type });
+        if (up.error) throw up.error;
+        uploaded.push({ path, media_type: s.mediaType });
+
+        // Poster from the first slide if it's a video.
+        if (i === 0 && s.meta.poster) {
+          const pPath = `posters/${id}.jpg`;
+          const pp = await supabase.storage
+            .from(BUCKET)
+            .upload(pPath, s.meta.poster, { contentType: "image/jpeg" });
+          if (!pp.error) posterPath = pPath;
+        }
       }
 
       setStatus("Saving…");
-      setPct(88);
+      setPct(95);
+      const cover = slides[0];
       const ins = await supabase.from("videos").insert({
         title: title.trim(),
         kind,
-        media_type: mediaType,
+        media_type: cover.mediaType,
         stage,
         format: format || null,
-        description: description.trim() || null,
-        video_path: videoPath,
+        video_path: uploaded[0].path,
         poster_path: posterPath,
-        width: meta?.width || null,
-        height: meta?.height || null,
-        duration: meta?.duration || null,
+        width: cover.meta.width || null,
+        height: cover.meta.height || null,
+        duration: cover.meta.duration || null,
+        slides: uploaded.length > 1 ? uploaded : null,
       });
       if (ins.error) throw ins.error;
 
       setPct(100);
-      setStatus("Done");
       onDone();
       onClose();
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Upload failed.";
-      setError(msg);
+      setError(e instanceof Error ? e.message : "Upload failed.");
       setBusy(false);
       setStatus("");
       setPct(0);
@@ -207,83 +226,80 @@ export default function UploadDialog({
           </button>
         </div>
 
-        {/* Dropzone */}
         <div className="field">
-          <div
-            className="dropzone"
-            data-drag={drag}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDrag(true);
-            }}
-            onDragLeave={() => setDrag(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDrag(false);
-              pick(e.dataTransfer.files?.[0]);
-            }}
-            onClick={() => !file && inputRef.current?.click()}
-            style={file ? { cursor: "default" } : {}}
-          >
-            {meta?.previewUrl ? (
-              <div className="dropzone-preview">
-                {mediaType === "image" ? (
-                  <img src={meta.previewUrl} alt="" />
-                ) : (
-                  <video src={meta.previewUrl} muted playsInline />
-                )}
-                <div>
-                  <strong>{file?.name}</strong>
-                  <div style={{ color: "var(--stone)", fontSize: 13, marginTop: 4 }}>
-                    {meta.width}&times;{meta.height}
-                    {meta.duration ? ` · ${meta.duration.toFixed(1)}s` : ""}
-                  </div>
-                  <button
-                    className="btn btn-ghost btn-sm"
-                    style={{ marginTop: 10 }}
-                    onClick={() => {
-                      setFile(null);
-                      setMeta(null);
-                    }}
-                    disabled={busy}
-                  >
-                    Replace
-                  </button>
-                </div>
+          {slides.length === 0 ? (
+            <div
+              className="dropzone"
+              data-drag={drag}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDrag(true);
+              }}
+              onDragLeave={() => setDrag(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDrag(false);
+                addFiles(e.dataTransfer.files);
+              }}
+              onClick={() => inputRef.current?.click()}
+            >
+              <div style={{ color: "var(--stone)", marginBottom: 8 }}>
+                <UploadIcon size={26} />
               </div>
-            ) : (
-              <>
-                <div style={{ color: "var(--stone)", marginBottom: 8 }}>
-                  <UploadIcon size={26} />
+              <div>
+                <strong>Drop files</strong> or click to browse
+              </div>
+              <div style={{ fontSize: 13, color: "var(--stone)", marginTop: 6 }}>
+                Add multiple for a carousel &middot; up to {MAX_MB}MB each
+              </div>
+            </div>
+          ) : (
+            <div className="slide-strip">
+              {slides.map((s, i) => (
+                <div className="slide-thumb" key={s.meta.previewUrl}>
+                  {s.mediaType === "image" ? (
+                    <img src={s.meta.previewUrl} alt="" />
+                  ) : (
+                    <video src={s.meta.previewUrl} muted playsInline />
+                  )}
+                  {!busy && (
+                    <button
+                      className="slide-remove"
+                      onClick={() => removeSlide(i)}
+                      aria-label="Remove"
+                    >
+                      <CloseIcon size={12} />
+                    </button>
+                  )}
+                  <span className="slide-num">{i + 1}</span>
                 </div>
-                <div>
-                  <strong>Drop a video or image</strong> or click to browse
-                </div>
-                <div style={{ fontSize: 13, color: "var(--stone)", marginTop: 6 }}>
-                  Video or image &middot; up to {MAX_MB}MB
-                </div>
-              </>
-            )}
-            <input
-              ref={inputRef}
-              type="file"
-              accept="video/*,image/*"
-              hidden
-              onChange={(e) => pick(e.target.files?.[0])}
-            />
-          </div>
+              ))}
+              {!busy && (
+                <button
+                  className="slide-add"
+                  onClick={() => inputRef.current?.click()}
+                  aria-label="Add more"
+                >
+                  +
+                </button>
+              )}
+            </div>
+          )}
+          <input
+            ref={inputRef}
+            type="file"
+            accept="video/*,image/*"
+            multiple
+            hidden
+            onChange={(e) => addFiles(e.target.files)}
+          />
         </div>
 
         <div className="field">
           <label>Collection</label>
           <div className="seg">
             {KINDS.map((k) => (
-              <button
-                key={k.id}
-                type="button"
-                data-on={kind === k.id}
-                onClick={() => setKind(k.id)}
-              >
+              <button key={k.id} type="button" data-on={kind === k.id} onClick={() => setKind(k.id)}>
                 {k.label}
               </button>
             ))}
@@ -305,12 +321,7 @@ export default function UploadDialog({
           <label>Funnel stage</label>
           <div className="seg">
             {STAGE_ORDER.map((id) => (
-              <button
-                key={id}
-                type="button"
-                data-on={stage === id}
-                onClick={() => setStage(id)}
-              >
+              <button key={id} type="button" data-on={stage === id} onClick={() => setStage(id)}>
                 {STAGES[id].label}
               </button>
             ))}
@@ -348,7 +359,7 @@ export default function UploadDialog({
             Cancel
           </button>
           <button className="btn btn-dark" onClick={submit} disabled={busy}>
-            {busy ? "Working…" : "Add to board"}
+            {busy ? "Working…" : slides.length > 1 ? `Add carousel (${slides.length})` : "Add to board"}
           </button>
         </div>
       </div>

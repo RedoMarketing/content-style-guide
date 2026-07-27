@@ -15,6 +15,7 @@ export default function VideoCard({
   const src = publicUrl(video.video_path);
   const poster = video.poster_path ? publicUrl(video.poster_path) : undefined;
   const isImage = video.media_type === "image";
+  const slideCount = video.slides?.length ?? 0;
 
   function hoverPlay() {
     const el = ref.current;
@@ -41,8 +42,16 @@ export default function VideoCard({
         }
       }}
       aria-label={`Open ${video.title}`}
-      title={video.title}
     >
+      {slideCount > 1 && (
+        <span className="tile-stack" aria-hidden>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+            <rect x="7" y="3" width="14" height="14" rx="2.5" stroke="currentColor" strokeWidth="2" />
+            <path d="M3 7v12a2 2 0 0 0 2 2h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+          {slideCount}
+        </span>
+      )}
       {isImage ? (
         <img src={src} alt={video.title} />
       ) : (
