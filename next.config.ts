@@ -1,13 +1,14 @@
 import type { NextConfig } from "next";
 
-const isProd = process.env.NODE_ENV === "production";
-const repo = "content-style-guide";
+// BASE_PATH is empty for Fridge (served at a subdomain root, e.g.
+// content-style-guide.fridge.redo.builders). Set it (e.g. /content-style-guide)
+// only when hosting under a subpath like GitHub Pages.
+const basePath = process.env.BASE_PATH || "";
 
 const nextConfig: NextConfig = {
   output: "export",
-  // Served from https://<org>.github.io/content-style-guide/ in production.
-  basePath: isProd ? `/${repo}` : undefined,
-  assetPrefix: isProd ? `/${repo}/` : undefined,
+  basePath: basePath || undefined,
+  assetPrefix: basePath ? `${basePath}/` : undefined,
   trailingSlash: true,
   images: { unoptimized: true },
   turbopack: {

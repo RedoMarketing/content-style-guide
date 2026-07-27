@@ -1,8 +1,8 @@
 name: Deploy to GitHub Pages
 
+# Manual only: Pages isn't enabled on this org's plan for private repos.
+# Primary host is Fridge (fridge.redo.builders). Kept for if the repo/plan changes.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -27,6 +27,7 @@ jobs:
       - name: Build static export
         run: npm run build
         env:
+          BASE_PATH: /content-style-guide
           NEXT_PUBLIC_SUPABASE_URL: https://jjezreqahluvohgxpoma.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_rptD8XEPS6N1GWIDl6yJzg_QPoKTFzH
       - run: touch out/.nojekyll
