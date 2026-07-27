@@ -1,8 +1,8 @@
 name: Deploy to GitHub Pages
 
-# Manual only: Pages isn't enabled on this org's plan for private repos.
-# Primary host is Fridge (fridge.redo.builders). Kept for if the repo/plan changes.
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
