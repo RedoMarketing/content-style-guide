@@ -132,6 +132,22 @@ export function InfoIcon({ size = 16 }: { size?: number }) {
   );
 }
 
+export function BrandIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="8.5" cy="9" r="1.5" fill="currentColor" />
+      <path
+        d="M4.5 17.5l4-4 3 2.5 3.5-4 4.5 5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function UploadIcon({ size = 18 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>

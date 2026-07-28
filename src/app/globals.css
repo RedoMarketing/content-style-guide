@@ -508,6 +508,103 @@ button {
 @media (max-width: 720px) {
   .funnel-intro, .fstep { width: 84vw; }
 }
+
+/* ---------- Brand assets page ---------- */
+.brand-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.brand-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 44px 24px 80px;
+}
+.brand-title {
+  margin: 8px 0 0;
+  font-family: var(--font-instrument), Georgia, serif;
+  font-size: clamp(40px, 5vw, 60px);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.brand-section { margin-top: 40px; }
+.brand-section > .fstage-label { margin-bottom: 14px; }
+.logo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.logo-card {
+  border: 1px solid var(--linen);
+  border-radius: 18px;
+  overflow: hidden;
+  background: #fff;
+}
+.logo-preview {
+  height: 168px;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.logo-preview svg {
+  max-width: 62%;
+  max-height: 66%;
+  width: auto;
+  height: auto;
+  display: block;
+}
+.logo-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 16px;
+  border-top: 1px solid var(--linen);
+}
+.logo-name { font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
+.logo-dl { display: flex; gap: 8px; }
+.dl-btn {
+  border: 1px solid var(--linen);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 9999px;
+  padding: 6px 13px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: background 0.14s, border-color 0.14s, color 0.14s;
+}
+.dl-btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+}
+.swatch {
+  border: 1px solid var(--linen);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.14s, transform 0.12s;
+}
+.swatch:hover { border-color: var(--stone); transform: translateY(-2px); }
+.swatch-color { display: block; height: 88px; }
+.swatch-meta { display: block; padding: 11px 13px; }
+.swatch-name { display: block; font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
+.swatch-hex {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--fog);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+}
+.swatch-note { display: block; margin-top: 4px; font-size: 12px; color: var(--stone); }
 .board-title {
   margin: 0;
   font-family: var(--font-instrument), Georgia, "Times New Roman", serif;
