@@ -958,12 +958,12 @@ button {
   background: var(--linen-soft);
   border: 1px solid rgba(20, 16, 20, 0.06);
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(20, 16, 20, 0.04), 0 3px 10px rgba(20, 16, 20, 0.05);
+  box-shadow: 0 6px 14px -8px rgba(20, 16, 20, 0.16);
   transition: transform 0.16s ease, box-shadow 0.16s ease;
 }
 .tile:hover {
   transform: translateY(-2px);
-  box-shadow: 0 2px 4px rgba(20, 16, 20, 0.05), 0 10px 26px rgba(20, 16, 20, 0.1);
+  box-shadow: 0 12px 22px -10px rgba(20, 16, 20, 0.22);
 }
 .tile video, .tile img {
   display: block;
