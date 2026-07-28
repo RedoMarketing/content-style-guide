@@ -23,6 +23,7 @@ export interface VideoRow {
   height: number | null;
   duration: number | null;
   slides: { path: string; media_type: "image" | "video" }[] | null;
+  transcript: { start: number; text: string }[] | null;
 }
 
 export function publicUrl(path: string): string {

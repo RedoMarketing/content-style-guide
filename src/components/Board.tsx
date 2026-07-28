@@ -8,7 +8,6 @@ import {
   FORMATS,
   MEDIA,
   KINDS,
-  formatLabel,
   type Stage,
   type Kind,
   type Media,
@@ -142,10 +141,7 @@ export default function Board({
           video={active}
           onClose={() => setActive(null)}
           onDelete={handleDelete}
-          onSaved={() => {
-            setActive(null);
-            onRefresh();
-          }}
+          onSaved={onRefresh}
         />
       )}
     </section>
@@ -161,6 +157,12 @@ function StageNote({ stage }: { stage: Stage }) {
   );
 }
 
+function fmtTime(s: number) {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, "0")}`;
+}
+
 function DetailPanel({
   video,
   onClose,
@@ -172,15 +174,19 @@ function DetailPanel({
   onDelete: (v: VideoRow) => Promise<void>;
   onSaved: () => void;
 }) {
-  const [title, setTitle] = useState(video.title);
   const [kind, setKind] = useState<Kind>(video.kind as Kind);
   const [stage, setStage] = useState<Stage | null>(video.stage);
   const [format, setFormat] = useState<string | null>(video.format);
-  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  const transcript = video.transcript ?? [];
+  const hasTranscript = transcript.length > 0;
+  const [tab, setTab] = useState<"details" | "transcript">("details");
+
   const [slideIdx, setSlideIdx] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const poster = video.poster_path ? publicUrl(video.poster_path) : undefined;
   const slides =
     video.slides && video.slides.length
@@ -190,25 +196,33 @@ function DetailPanel({
   const slide = slides[i];
   const slideSrc = publicUrl(slide.path);
 
-  const dirty =
-    title.trim() !== video.title ||
-    kind !== video.kind ||
-    stage !== video.stage ||
-    format !== video.format;
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  async function patch(fields: Partial<VideoRow>) {
+    const { error } = await supabase.from("videos").update(fields).eq("id", video.id);
+    if (!error) {
+      setSaved(true);
+      if (savedTimer.current) clearTimeout(savedTimer.current);
+      savedTimer.current = setTimeout(() => setSaved(false), 1400);
+      onSaved();
+    }
+  }
 
-  async function save() {
-    setSaving(true);
-    const { error } = await supabase
-      .from("videos")
-      .update({
-        title: title.trim() || video.title,
-        kind,
-        stage,
-        format,
-      })
-      .eq("id", video.id);
-    setSaving(false);
-    if (!error) onSaved();
+  function seek(t: number) {
+    const el = videoRef.current;
+    if (!el) return;
+    el.currentTime = t;
+    el.play().catch(() => {});
+  }
+
+  async function copyTranscript() {
+    const text = transcript.map((s) => s.text).join(" ");
+    try {
+      await navigator.clipboard.writeText(text);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 1400);
+    } catch {
+      /* ignore */
+    }
   }
 
   return (
@@ -218,7 +232,9 @@ function DetailPanel({
     >
       <aside className="drawer" role="dialog" aria-modal="true" aria-label={video.title}>
         <div className="drawer-head">
-          <span className="drawer-eyebrow">Edit details</span>
+          <span className="drawer-eyebrow">
+            {saved ? "Saved" : "Details"}
+          </span>
           <button className="icon-btn" onClick={onClose} aria-label="Close">
             <CloseIcon />
           </button>
@@ -228,7 +244,14 @@ function DetailPanel({
           {slide.media_type === "image" ? (
             <img src={slideSrc} alt={video.title} />
           ) : (
-            <video key={slide.path} src={slideSrc} poster={poster} controls playsInline />
+            <video
+              key={slide.path}
+              ref={videoRef}
+              src={slideSrc}
+              poster={poster}
+              controls
+              playsInline
+            />
           )}
           {slides.length > 1 && (
             <>
@@ -253,108 +276,137 @@ function DetailPanel({
           )}
         </div>
 
-        <div className="field" style={{ marginTop: 18 }}>
-          <label htmlFor="d-title">Title</label>
-          <input
-            id="d-title"
-            className="input"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-        </div>
-
-        <div className="field">
-          <label>Collection</label>
-          <div className="seg">
-            {KINDS.map((k) => (
-              <button
-                key={k.id}
-                type="button"
-                data-on={kind === k.id}
-                onClick={() => setKind(k.id)}
-              >
-                {k.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="field">
-          <label>Funnel stage</label>
-          <div className="seg">
-            <button type="button" data-on={stage === null} onClick={() => setStage(null)}>
-              Unassigned
+        {hasTranscript && (
+          <div className="drawer-tabs">
+            <button data-on={tab === "details"} onClick={() => setTab("details")}>
+              Details
             </button>
-            {STAGE_ORDER.map((s) => (
+            <button data-on={tab === "transcript"} onClick={() => setTab("transcript")}>
+              Transcript
+            </button>
+          </div>
+        )}
+
+        {tab === "transcript" && hasTranscript ? (
+          <div className="transcript">
+            {transcript.map((seg, idx) => (
               <button
-                key={s}
-                type="button"
-                data-on={stage === s}
-                onClick={() => setStage(s)}
+                key={idx}
+                className="tseg"
+                onClick={() => seek(seg.start)}
+                title="Jump to this moment"
               >
-                {STAGES[s].label}
+                <span className="tseg-time">{fmtTime(seg.start)}</span>
+                <span className="tseg-text">{seg.text}</span>
               </button>
             ))}
+            <button className="btn btn-ghost btn-sm tseg-copy" onClick={copyTranscript}>
+              Copy transcript
+            </button>
           </div>
-        </div>
+        ) : (
+          <>
+            <div className="field">
+              <label>Collection</label>
+              <div className="seg">
+                {KINDS.map((k) => (
+                  <button
+                    key={k.id}
+                    type="button"
+                    data-on={kind === k.id}
+                    onClick={() => {
+                      setKind(k.id);
+                      patch({ kind: k.id });
+                    }}
+                  >
+                    {k.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        <div className="field">
-          <label>Style</label>
-          <div className="seg">
-            {FORMATS.map((f) => (
-              <button
-                key={f.id}
-                type="button"
-                data-on={format === f.id}
-                onClick={() => setFormat(format === f.id ? null : f.id)}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-        </div>
+            <div className="field">
+              <label>Funnel stage</label>
+              <div className="seg">
+                <button
+                  type="button"
+                  data-on={stage === null}
+                  onClick={() => {
+                    setStage(null);
+                    patch({ stage: null });
+                  }}
+                >
+                  Unassigned
+                </button>
+                {STAGE_ORDER.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    data-on={stage === s}
+                    onClick={() => {
+                      setStage(s);
+                      patch({ stage: s });
+                    }}
+                  >
+                    {STAGES[s].label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        <div className="drawer-actions">
-          {confirming ? (
-            <>
-              <span className="drawer-confirm">Delete permanently?</span>
-              <button
-                className="btn btn-ghost btn-sm"
-                onClick={() => setConfirming(false)}
-                disabled={deleting}
-              >
-                Cancel
-              </button>
-              <button
-                className="btn btn-danger btn-sm"
-                onClick={async () => {
-                  setDeleting(true);
-                  await onDelete(video);
-                }}
-                disabled={deleting}
-              >
-                {deleting ? "Deleting…" : "Delete"}
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                className="btn btn-danger-ghost btn-sm"
-                onClick={() => setConfirming(true)}
-              >
-                Delete
-              </button>
-              <span style={{ flex: 1 }} />
-              <button
-                className="btn btn-dark btn-sm"
-                onClick={save}
-                disabled={!dirty || saving}
-              >
-                {saving ? "Saving…" : "Save changes"}
-              </button>
-            </>
-          )}
-        </div>
+            <div className="field">
+              <label>Style</label>
+              <div className="seg">
+                {FORMATS.map((f) => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    data-on={format === f.id}
+                    onClick={() => {
+                      const next = format === f.id ? null : f.id;
+                      setFormat(next);
+                      patch({ format: next });
+                    }}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="drawer-actions">
+              {confirming ? (
+                <>
+                  <span className="drawer-confirm">Delete permanently?</span>
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => setConfirming(false)}
+                    disabled={deleting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={async () => {
+                      setDeleting(true);
+                      await onDelete(video);
+                    }}
+                    disabled={deleting}
+                  >
+                    {deleting ? "Deleting…" : "Delete"}
+                  </button>
+                </>
+              ) : (
+                <button
+                  className="btn btn-danger-ghost btn-sm"
+                  onClick={() => setConfirming(true)}
+                >
+                  Delete
+                </button>
+              )}
+            </div>
+          </>
+        )}
       </aside>
     </div>
   );
