@@ -956,14 +956,13 @@ button {
   border-radius: 16px;
   overflow: hidden;
   background: var(--linen-soft);
-  border: 1px solid rgba(20, 16, 20, 0.06);
+  border: 1px solid rgba(20, 16, 20, 0.07);
   cursor: pointer;
-  box-shadow: 0 6px 14px -8px rgba(20, 16, 20, 0.16);
   transition: transform 0.16s ease, box-shadow 0.16s ease;
 }
 .tile:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 22px -10px rgba(20, 16, 20, 0.22);
+  box-shadow: 0 12px 18px -12px rgba(20, 16, 20, 0.22);
 }
 .tile video, .tile img {
   display: block;

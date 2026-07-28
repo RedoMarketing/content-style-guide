@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase, BUCKET, publicUrl, type VideoRow } from "@/lib/supabase";
 import {
   STAGE_ORDER,
@@ -55,6 +55,29 @@ export default function Board({
     [videos, kind, stage, fmt, media]
   );
 
+  // Pinterest-style chunked loading: render a batch, load more on scroll.
+  const PAGE = 24;
+  const [limit, setLimit] = useState(PAGE);
+  useEffect(() => {
+    setLimit(PAGE);
+  }, [kind, stage, fmt, media]);
+  const visible = shown.slice(0, limit);
+  const hasMore = visible.length < shown.length;
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!hasMore) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) setLimit((l) => l + PAGE);
+      },
+      { rootMargin: "800px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasMore, limit]);
+
   async function handleDelete(v: VideoRow) {
     const paths = [v.video_path, v.poster_path].filter(Boolean) as string[];
     await supabase.storage.from(BUCKET).remove(paths);
@@ -105,13 +128,14 @@ export default function Board({
 
       {stage && <StageNote stage={stage} />}
 
-      {shown.length > 0 && (
+      {visible.length > 0 && (
         <div className="masonry">
-          {shown.map((v) => (
+          {visible.map((v) => (
             <VideoCard key={v.id} video={v} onOpen={setActive} />
           ))}
         </div>
       )}
+      {hasMore && <div ref={sentinelRef} aria-hidden style={{ height: 1 }} />}
 
       {active && (
         <DetailPanel

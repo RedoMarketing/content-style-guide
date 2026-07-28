@@ -53,7 +53,7 @@ export default function VideoCard({
         </span>
       )}
       {isImage ? (
-        <img src={src} alt={video.title} />
+        <img src={src} alt={video.title} loading="lazy" decoding="async" />
       ) : (
         <>
           <video
