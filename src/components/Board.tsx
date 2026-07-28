@@ -14,6 +14,7 @@ import {
 } from "@/lib/stages";
 import VideoCard from "./VideoCard";
 import FilterDropdown from "./FilterDropdown";
+import SelectField from "./SelectField";
 import { CloseIcon } from "./icons";
 
 export default function Board({
@@ -308,70 +309,46 @@ function DetailPanel({
           <>
             <div className="field">
               <label>Collection</label>
-              <div className="seg">
-                {KINDS.map((k) => (
-                  <button
-                    key={k.id}
-                    type="button"
-                    data-on={kind === k.id}
-                    onClick={() => {
-                      setKind(k.id);
-                      patch({ kind: k.id });
-                    }}
-                  >
-                    {k.label}
-                  </button>
-                ))}
-              </div>
+              <SelectField
+                value={kind}
+                options={KINDS.map((k) => ({ id: k.id, label: k.label }))}
+                onChange={(v) => {
+                  setKind(v as Kind);
+                  patch({ kind: v as Kind });
+                }}
+              />
             </div>
 
             <div className="field">
               <label>Funnel stage</label>
-              <div className="seg">
-                <button
-                  type="button"
-                  data-on={stage === null}
-                  onClick={() => {
-                    setStage(null);
-                    patch({ stage: null });
-                  }}
-                >
-                  Unassigned
-                </button>
-                {STAGE_ORDER.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    data-on={stage === s}
-                    onClick={() => {
-                      setStage(s);
-                      patch({ stage: s });
-                    }}
-                  >
-                    {STAGES[s].label}
-                  </button>
-                ))}
-              </div>
+              <SelectField
+                value={stage ?? ""}
+                options={[
+                  { id: "", label: "Unassigned" },
+                  ...STAGE_ORDER.map((s) => ({ id: s, label: STAGES[s].label })),
+                ]}
+                onChange={(v) => {
+                  const next = (v || null) as Stage | null;
+                  setStage(next);
+                  patch({ stage: next });
+                }}
+              />
             </div>
 
             <div className="field">
               <label>Style</label>
-              <div className="seg">
-                {FORMATS.map((f) => (
-                  <button
-                    key={f.id}
-                    type="button"
-                    data-on={format === f.id}
-                    onClick={() => {
-                      const next = format === f.id ? null : f.id;
-                      setFormat(next);
-                      patch({ format: next });
-                    }}
-                  >
-                    {f.label}
-                  </button>
-                ))}
-              </div>
+              <SelectField
+                value={format ?? ""}
+                options={[
+                  { id: "", label: "None" },
+                  ...FORMATS.map((f) => ({ id: f.id, label: f.label })),
+                ]}
+                onChange={(v) => {
+                  const next = v || null;
+                  setFormat(next);
+                  patch({ format: next });
+                }}
+              />
             </div>
 
             <div className="drawer-actions">
