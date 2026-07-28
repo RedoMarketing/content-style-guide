@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase, BUCKET } from "@/lib/supabase";
+import { transcribe } from "@/lib/transcribe";
 import {
   STAGE_ORDER,
   STAGES,
@@ -185,24 +186,41 @@ export default function UploadDialog({
       setStatus("Saving…");
       setPct(95);
       const cover = slides[0];
-      const ins = await supabase.from("videos").insert({
-        title: title.trim(),
-        kind,
-        media_type: cover.mediaType,
-        stage,
-        format: format || null,
-        video_path: uploaded[0].path,
-        poster_path: posterPath,
-        width: cover.meta.width || null,
-        height: cover.meta.height || null,
-        duration: cover.meta.duration || null,
-        slides: uploaded.length > 1 ? uploaded : null,
-      });
+      const ins = await supabase
+        .from("videos")
+        .insert({
+          title: title.trim(),
+          kind,
+          media_type: cover.mediaType,
+          stage,
+          format: format || null,
+          video_path: uploaded[0].path,
+          poster_path: posterPath,
+          width: cover.meta.width || null,
+          height: cover.meta.height || null,
+          duration: cover.meta.duration || null,
+          slides: uploaded.length > 1 ? uploaded : null,
+        })
+        .select("id")
+        .single();
       if (ins.error) throw ins.error;
 
       setPct(100);
       onDone();
       onClose();
+
+      // Auto-transcribe the first video in the background (in-browser Whisper).
+      const videoSlide = slides.find((s) => s.mediaType === "video");
+      if (videoSlide && ins.data?.id) {
+        transcribe(videoSlide.file)
+          .then(async (segs) => {
+            if (segs.length) {
+              await supabase.from("videos").update({ transcript: segs }).eq("id", ins.data.id);
+              onDone();
+            }
+          })
+          .catch((e) => console.warn("[transcribe] upload transcription failed", e));
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed.");
       setBusy(false);

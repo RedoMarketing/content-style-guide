@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { supabase, type VideoRow } from "@/lib/supabase";
+import { supabase, publicUrl, type VideoRow } from "@/lib/supabase";
+import { transcribe } from "@/lib/transcribe";
 import Board from "./Board";
 import UploadDialog from "./UploadDialog";
 import FunnelPanel from "./FunnelPanel";
@@ -25,6 +26,30 @@ export default function Library() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Backfill helper (run from console): window.__backfillTranscripts(limit?)
+  useEffect(() => {
+    (window as unknown as { __backfillTranscripts: (limit?: number) => Promise<void> }).__backfillTranscripts =
+      async (limit?: number) => {
+        const missing = videos.filter(
+          (v) => v.media_type === "video" && (!v.transcript || v.transcript.length === 0)
+        );
+        const todo = typeof limit === "number" ? missing.slice(0, limit) : missing;
+        console.log(`[transcribe] ${todo.length} video(s) to process`);
+        for (const v of todo) {
+          try {
+            console.log(`[transcribe] start ${v.id} (${v.title})`);
+            const segs = await transcribe(publicUrl(v.video_path));
+            await supabase.from("videos").update({ transcript: segs }).eq("id", v.id);
+            console.log(`[transcribe] done ${v.id}: ${segs.length} segments`);
+          } catch (e) {
+            console.warn(`[transcribe] failed ${v.id}`, e);
+          }
+        }
+        await load();
+        console.log("[transcribe] backfill complete");
+      };
+  }, [videos, load]);
 
   return (
     <main className="page">

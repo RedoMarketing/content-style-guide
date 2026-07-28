@@ -14,7 +14,7 @@ export interface VideoRow {
   title: string;
   kind: "inspiration" | "actual";
   media_type: "image" | "video";
-  stage: Stage;
+  stage: Stage | null;
   format: string | null;
   description: string | null;
   video_path: string;
