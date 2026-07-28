@@ -23,10 +23,57 @@ export interface BrandColor {
   note?: string;
 }
 
+// Palette from Arbiter (Redo's design system in Figma).
 export const COLORS: BrandColor[] = [
-  { name: "Redo Orange", hex: "#FE4608", note: "Primary" },
-  { name: "Orange Dark", hex: "#D63A06", note: "Hover / pressed" },
-  { name: "Ink", hex: "#0C0C0C", note: "Text & surfaces" },
-  { name: "Off White", hex: "#F0EFED", note: "On-dark text" },
-  { name: "Muted Grey", hex: "#6B6A67", note: "Secondary text" },
+  { name: "Orange", hex: "#FF4405", note: "Primary accent" },
+  { name: "Ink", hex: "#141414", note: "Text primary (900)" },
+  { name: "Gray 600", hex: "#525252", note: "Secondary text" },
+  { name: "Gray 400", hex: "#A3A3A3", note: "Muted" },
+  { name: "Gray 300", hex: "#D6D6D6", note: "Border" },
+  { name: "Gray 200", hex: "#E5E5E5", note: "Divider" },
+  { name: "Gray 100", hex: "#F5F5F5", note: "Surface" },
+  { name: "White", hex: "#FFFFFF", note: "Background" },
+];
+
+// Typefaces — Inter (UI/body) and Instrument Serif (display/editorial).
+export interface BrandFont {
+  name: string;
+  role: string;
+  family: string;
+  weight: number;
+  note: string;
+}
+
+export const FONTS: BrandFont[] = [
+  {
+    name: "Instrument Serif",
+    role: "Headlines",
+    family: "var(--font-instrument), Georgia, serif",
+    weight: 400,
+    note: "Big statements and titles",
+  },
+  {
+    name: "Inter",
+    role: "Everything else",
+    family: "var(--font-pin-sans), system-ui, sans-serif",
+    weight: 500,
+    note: "Body copy, buttons, and labels",
+  },
+];
+
+// Type scale in plain terms — name, size, which font, and where to use it.
+export interface TypeStep {
+  name: string;
+  px: number;
+  serif: boolean;
+  weight: number;
+  use: string;
+}
+
+export const TYPE_SCALE: TypeStep[] = [
+  { name: "Headline", px: 56, serif: true, weight: 400, use: "Hero lines and page titles" },
+  { name: "Title", px: 34, serif: true, weight: 400, use: "Section headers" },
+  { name: "Lead", px: 20, serif: false, weight: 500, use: "Intros and standout copy" },
+  { name: "Body", px: 16, serif: false, weight: 400, use: "Everyday paragraph text" },
+  { name: "Label", px: 13, serif: false, weight: 600, use: "Buttons, tags, small UI" },
 ];

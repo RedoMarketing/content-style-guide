@@ -32,7 +32,7 @@ export default function Library() {
         <h1 className="board-title">Content Style Guide</h1>
         <div className="head-actions">
           <button className="learn-btn" onClick={() => setFunnelOpen(true)}>
-            <InfoIcon /> Learn about the funnel
+            <InfoIcon /> Tone & Funnel
           </button>
           <button className="learn-btn" onClick={() => setBrandOpen(true)}>
             <BrandIcon /> Brand

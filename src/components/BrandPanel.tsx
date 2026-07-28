@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { COLORS, wordmarkSvg, iconSvg } from "@/lib/brand";
+import { COLORS, FONTS, TYPE_SCALE, wordmarkSvg, iconSvg } from "@/lib/brand";
+
+const INTER = "var(--font-pin-sans), system-ui, sans-serif";
+const SERIF = "var(--font-instrument), Georgia, serif";
+const TYPE_SAMPLE = "Win with Redo";
 
 function BackArrow() {
   return (
@@ -58,9 +62,9 @@ interface Logo {
 }
 
 const LOGOS: Logo[] = [
-  { key: "redo-wordmark", name: "Wordmark", bg: "#ffffff", svg: wordmarkSvg("#0C0C0C"), png: 1200 },
-  { key: "redo-wordmark-white", name: "Wordmark (reversed)", bg: "#0C0C0C", svg: wordmarkSvg("#F0EFED"), png: 1200, dark: true },
-  { key: "redo-icon", name: "App icon", bg: "#F1F0EC", svg: iconSvg("#0C0C0C", "#FFFFFF"), png: 512 },
+  { key: "redo-wordmark", name: "Wordmark", bg: "#ffffff", svg: wordmarkSvg("#141414"), png: 1200 },
+  { key: "redo-wordmark-white", name: "Wordmark (reversed)", bg: "#141414", svg: wordmarkSvg("#FFFFFF"), png: 1200, dark: true },
+  { key: "redo-icon", name: "App icon", bg: "#F5F5F5", svg: iconSvg("#141414", "#FFFFFF"), png: 512 },
 ];
 
 export default function BrandPanel({ onClose }: { onClose: () => void }) {
@@ -69,7 +73,13 @@ export default function BrandPanel({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    const root = document.documentElement;
+    const prev = root.style.overflow;
+    root.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      root.style.overflow = prev;
+    };
   }, [onClose]);
 
   async function copyHex(hex: string) {
@@ -95,8 +105,8 @@ export default function BrandPanel({ onClose }: { onClose: () => void }) {
           <span className="drawer-eyebrow">Brand assets</span>
           <h1 className="brand-title">Brand</h1>
           <p className="funnel-lede" style={{ marginTop: 14 }}>
-            The Redo logo and core colors. Grab any logo as SVG or PNG, and click
-            a swatch to copy its hex.
+            Everything you need to keep Redo content on-brand: logos, colors, and
+            fonts. Grab any logo as SVG or PNG, and click a color to copy it.
           </p>
 
           <section className="brand-section">
@@ -147,6 +157,48 @@ export default function BrandPanel({ onClose }: { onClose: () => void }) {
                     {c.note && <span className="swatch-note">{c.note}</span>}
                   </span>
                 </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="brand-section">
+            <span className="fstage-label">Typography</span>
+            <div className="font-grid">
+              {FONTS.map((f) => (
+                <div className="font-card" key={f.name}>
+                  <span
+                    className="font-specimen"
+                    style={{ fontFamily: f.family, fontWeight: f.weight }}
+                  >
+                    Ag
+                  </span>
+                  <span className="font-meta">
+                    <span className="font-name">{f.name}</span>
+                    <span className="font-role">{f.role}</span>
+                    <span className="font-note">{f.note}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="type-scale">
+              {TYPE_SCALE.map((t) => (
+                <div className="type-row" key={t.name}>
+                  <span
+                    className="type-sample"
+                    style={{
+                      fontFamily: t.serif ? SERIF : INTER,
+                      fontSize: t.px,
+                      fontWeight: t.weight,
+                      letterSpacing: t.px >= 30 ? "-0.01em" : "0",
+                    }}
+                  >
+                    {TYPE_SAMPLE}
+                  </span>
+                  <span className="type-info">
+                    <span className="type-name">{t.name}</span>
+                    <span className="type-use">{t.use}</span>
+                  </span>
+                </div>
               ))}
             </div>
           </section>
