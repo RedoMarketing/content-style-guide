@@ -15,15 +15,13 @@ import {
 } from "@/lib/stages";
 import VideoCard from "./VideoCard";
 import FilterDropdown from "./FilterDropdown";
-import { CloseIcon, UploadIcon } from "./icons";
+import { CloseIcon } from "./icons";
 
 export default function Board({
   videos,
-  onUpload,
   onRefresh,
 }: {
   videos: VideoRow[];
-  onUpload: () => void;
   onRefresh: () => void;
 }) {
   const [kind, setKind] = useState<Kind>("inspiration");
@@ -103,15 +101,6 @@ export default function Board({
             onChange={(v) => setMedia(v as Media | null)}
           />
         </div>
-
-        <button
-          className="icon-round"
-          onClick={onUpload}
-          aria-label="Upload"
-          title="Upload"
-        >
-          <UploadIcon size={20} />
-        </button>
       </div>
 
       {stage && <StageNote stage={stage} />}

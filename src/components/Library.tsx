@@ -5,7 +5,7 @@ import { supabase, type VideoRow } from "@/lib/supabase";
 import Board from "./Board";
 import UploadDialog from "./UploadDialog";
 import FunnelPanel from "./FunnelPanel";
-import { InfoIcon } from "./icons";
+import { InfoIcon, UploadIcon } from "./icons";
 
 export default function Library() {
   const [videos, setVideos] = useState<VideoRow[]>([]);
@@ -28,16 +28,22 @@ export default function Library() {
     <main className="page">
       <header className="shell board-head">
         <h1 className="board-title">Content Style Guide</h1>
-        <button className="learn-btn" onClick={() => setFunnelOpen(true)}>
-          <InfoIcon /> Learn about the funnel
-        </button>
+        <div className="head-actions">
+          <button className="learn-btn" onClick={() => setFunnelOpen(true)}>
+            <InfoIcon /> Learn about the funnel
+          </button>
+          <button
+            className="icon-round"
+            onClick={() => setUploadOpen(true)}
+            aria-label="Upload"
+            title="Upload"
+          >
+            <UploadIcon size={20} />
+          </button>
+        </div>
       </header>
 
-      <Board
-        videos={videos}
-        onUpload={() => setUploadOpen(true)}
-        onRefresh={load}
-      />
+      <Board videos={videos} onRefresh={load} />
 
       {uploadOpen && (
         <UploadDialog onClose={() => setUploadOpen(false)} onDone={load} />

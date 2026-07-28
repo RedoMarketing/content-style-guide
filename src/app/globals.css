@@ -320,7 +320,14 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  flex-wrap: wrap;
   margin-bottom: 26px;
+}
+.head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 .learn-btn {
   display: inline-flex;
@@ -655,7 +662,7 @@ button {
 .fbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 12px;
   flex-wrap: wrap;
   margin-bottom: 24px;
@@ -1251,6 +1258,14 @@ button {
   overflow-y: auto;
   padding: 18px 22px 28px;
   animation: drawer-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (max-width: 640px) {
+  .drawer {
+    width: 100%;
+    padding-bottom: 40px;
+  }
+  .overlay { padding: 16px; }
+  .dialog { padding: 22px; }
 }
 @keyframes drawer-in {
   from { transform: translateX(24px); opacity: 0.4; }
