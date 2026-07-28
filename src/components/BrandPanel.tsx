@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { COLORS, FONTS, TYPE_SCALE, wordmarkSvg, iconSvg } from "@/lib/brand";
+import { DownloadIcon } from "./icons";
 
 const INTER = "var(--font-pin-sans), system-ui, sans-serif";
 const SERIF = "var(--font-instrument), Georgia, serif";
@@ -177,6 +178,15 @@ export default function BrandPanel({ onClose }: { onClose: () => void }) {
                     <span className="font-role">{f.role}</span>
                     <span className="font-note">{f.note}</span>
                   </span>
+                  <a
+                    className="font-dl"
+                    href={f.file}
+                    download
+                    aria-label={`Download ${f.name}`}
+                    title={`Download ${f.name}`}
+                  >
+                    <DownloadIcon size={18} />
+                  </a>
                 </div>
               ))}
             </div>

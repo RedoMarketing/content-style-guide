@@ -42,6 +42,7 @@ export interface BrandFont {
   family: string;
   weight: number;
   note: string;
+  file: string;
 }
 
 export const FONTS: BrandFont[] = [
@@ -51,6 +52,7 @@ export const FONTS: BrandFont[] = [
     family: "var(--font-instrument), Georgia, serif",
     weight: 400,
     note: "Big statements and titles",
+    file: "fonts/InstrumentSerif-Regular.ttf",
   },
   {
     name: "Inter",
@@ -58,6 +60,7 @@ export const FONTS: BrandFont[] = [
     family: "var(--font-pin-sans), system-ui, sans-serif",
     weight: 500,
     note: "Body copy, buttons, and labels",
+    file: "fonts/Inter-Variable.ttf",
   },
 ];
 

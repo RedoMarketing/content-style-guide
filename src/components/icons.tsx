@@ -148,6 +148,20 @@ export function BrandIcon({ size = 16 }: { size?: number }) {
   );
 }
 
+export function DownloadIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function UploadIcon({ size = 18 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
