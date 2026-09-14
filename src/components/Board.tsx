@@ -179,8 +179,22 @@ function DetailPanel({
   const [stage, setStage] = useState<Stage | null>(video.stage);
   const [format, setFormat] = useState<string | null>(video.format);
   const [saved, setSaved] = useState(false);
+  const [shared, setShared] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  async function copyShare() {
+    try {
+      const u = new URL("share/", window.location.href);
+      u.search = "";
+      u.searchParams.set("id", video.id);
+      await navigator.clipboard.writeText(u.href);
+      setShared(true);
+      setTimeout(() => setShared(false), 1600);
+    } catch {
+      /* ignore */
+    }
+  }
 
   const transcript = video.transcript ?? [];
   const hasTranscript = transcript.length > 0;
@@ -374,12 +388,18 @@ function DetailPanel({
                   </button>
                 </>
               ) : (
-                <button
-                  className="btn btn-danger-ghost btn-sm"
-                  onClick={() => setConfirming(true)}
-                >
-                  Delete
-                </button>
+                <>
+                  <button className="btn btn-ghost btn-sm" onClick={copyShare}>
+                    {shared ? "Link copied" : "Share"}
+                  </button>
+                  <span style={{ flex: 1 }} />
+                  <button
+                    className="btn btn-danger-ghost btn-sm"
+                    onClick={() => setConfirming(true)}
+                  >
+                    Delete
+                  </button>
+                </>
               )}
             </div>
           </>

@@ -1581,6 +1581,20 @@ button {
 }
 .tseg-copy { margin-top: 12px; align-self: flex-start; }
 
+/* Standalone shared-video page */
+.share-page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 16px 72px;
+  background: #fff;
+}
+.share-mark { width: 92px; margin-bottom: 28px; }
+.share-mark svg { width: 100%; height: auto; display: block; }
+.share-card { width: 100%; max-width: 460px; }
+.share-msg { color: var(--fog); font-size: 15px; margin-top: 20px; }
+
 .drawer-title {
   margin: 18px 0 0;
   font-size: 20px;
