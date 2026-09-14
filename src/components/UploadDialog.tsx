@@ -7,9 +7,7 @@ import {
   STAGE_ORDER,
   STAGES,
   FORMATS,
-  KINDS,
   type Stage,
-  type Kind,
   type Media,
 } from "@/lib/stages";
 import { CloseIcon } from "./icons";
@@ -93,7 +91,6 @@ export default function UploadDialog({
 }) {
   const [slides, setSlides] = useState<Slide[]>([]);
   const [title, setTitle] = useState("");
-  const [kind, setKind] = useState<Kind>("actual");
   const [stage, setStage] = useState<Stage>("awareness");
   const [format, setFormat] = useState<string>("");
   const [drag, setDrag] = useState(false);
@@ -190,7 +187,7 @@ export default function UploadDialog({
         .from("videos")
         .insert({
           title: title.trim(),
-          kind,
+          kind: "inspiration",
           media_type: cover.mediaType,
           stage,
           format: format || null,
@@ -304,17 +301,6 @@ export default function UploadDialog({
             hidden
             onChange={(e) => addFiles(e.target.files)}
           />
-        </div>
-
-        <div className="field">
-          <label>Collection</label>
-          <div className="seg">
-            {KINDS.map((k) => (
-              <button key={k.id} type="button" data-on={kind === k.id} onClick={() => setKind(k.id)}>
-                {k.label}
-              </button>
-            ))}
-          </div>
         </div>
 
         <div className="field">

@@ -7,9 +7,7 @@ import {
   STAGES,
   FORMATS,
   MEDIA,
-  KINDS,
   type Stage,
-  type Kind,
   type Media,
 } from "@/lib/stages";
 import VideoCard from "./VideoCard";
@@ -24,35 +22,21 @@ export default function Board({
   videos: VideoRow[];
   onRefresh: () => void;
 }) {
-  const [kind, setKind] = useState<Kind>("inspiration");
   const [stage, setStage] = useState<Stage | null>(null);
   const [fmt, setFmt] = useState<string | null>(null);
   const [media, setMedia] = useState<Media | null>(null);
   const [active, setActive] = useState<VideoRow | null>(null);
 
-  const kindCounts = useMemo(() => {
-    const pool = videos.filter(
-      (v) =>
-        (!stage || v.stage === stage) &&
-        (!fmt || v.format === fmt) &&
-        (!media || v.media_type === media)
-    );
-    return {
-      inspiration: pool.filter((v) => v.kind === "inspiration").length,
-      actual: pool.filter((v) => v.kind === "actual").length,
-    } as Record<Kind, number>;
-  }, [videos, stage, fmt, media]);
-
   const shown = useMemo(
     () =>
       videos.filter(
         (v) =>
-          v.kind === kind &&
+          v.kind === "inspiration" &&
           (!stage || v.stage === stage) &&
           (!fmt || v.format === fmt) &&
           (!media || v.media_type === media)
       ),
-    [videos, kind, stage, fmt, media]
+    [videos, stage, fmt, media]
   );
 
   // Pinterest-style chunked loading: render a batch, load more on scroll.
@@ -60,7 +44,7 @@ export default function Board({
   const [limit, setLimit] = useState(PAGE);
   useEffect(() => {
     setLimit(PAGE);
-  }, [kind, stage, fmt, media]);
+  }, [stage, fmt, media]);
   const visible = shown.slice(0, limit);
   const hasMore = visible.length < shown.length;
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -88,21 +72,6 @@ export default function Board({
 
   return (
     <section className="shell board" id="board">
-      <div className="kind-toggle" role="tablist" aria-label="Inspiration or actuals">
-        {KINDS.map((k) => (
-          <button
-            key={k.id}
-            role="tab"
-            aria-selected={kind === k.id}
-            data-on={kind === k.id}
-            onClick={() => setKind(k.id)}
-          >
-            {k.label}
-            <span className="kt-count">{kindCounts[k.id]}</span>
-          </button>
-        ))}
-      </div>
-
       <div className="fbar">
         <div className="fbar-filters">
           <FilterDropdown
@@ -175,7 +144,6 @@ function DetailPanel({
   onDelete: (v: VideoRow) => Promise<void>;
   onSaved: () => void;
 }) {
-  const [kind, setKind] = useState<Kind>(video.kind as Kind);
   const [stage, setStage] = useState<Stage | null>(video.stage);
   const [format, setFormat] = useState<string | null>(video.format);
   const [saved, setSaved] = useState(false);
@@ -321,18 +289,6 @@ function DetailPanel({
           </div>
         ) : (
           <>
-            <div className="field">
-              <label>Collection</label>
-              <SelectField
-                value={kind}
-                options={KINDS.map((k) => ({ id: k.id, label: k.label }))}
-                onChange={(v) => {
-                  setKind(v as Kind);
-                  patch({ kind: v as Kind });
-                }}
-              />
-            </div>
-
             <div className="field">
               <label>Funnel stage</label>
               <SelectField
